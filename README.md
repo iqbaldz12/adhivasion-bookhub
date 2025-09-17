@@ -112,7 +112,7 @@ use Illuminate\Http\Request;
 Route::middleware('auth:sanctum')->get('/me', fn(Request $r) => $r->user());
 ```
 
-> **Laravel 11:** pastikan `bootstrap/app.php` mendaftarkan route API:
+> pastikan `bootstrap/app.php` mendaftarkan route API:
 
 ```php
 ->withRouting(
