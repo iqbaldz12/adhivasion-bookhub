@@ -2,7 +2,7 @@ Berikut **README.md** yang bisa langsung kamu taruh di root project.
 
 ---
 
-# Adhivasindo BookHub (Laravel 11)
+# Adhivasindo BookHub 
 
 API sederhana untuk Take-Home Test: **Auth (Sanctum)**, **CRUD Buku** + filter, dan **Peminjaman (Loans)** yang mengurangi stok & kirim email via queue (mailer `log`). Disertai **Postman Collection** dan **Testing**.
 
