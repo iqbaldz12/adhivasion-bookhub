@@ -128,9 +128,7 @@ Route::middleware('auth:sanctum')->get('/me', fn(Request $r) => $r->user());
 ## 6) Pengujian via Postman
 
 1. Import file:
-
-   * `AdhivasindoBookHub_v3.postman_collection.json`
-   * `AdhivasindoLocal_v2.postman_environment.json`
+https://solar-meteor-130403.postman.co/workspace/My-Workspace~40185266-4389-426c-8be5-519e3432374b/collection/25304163-7a215832-9452-4f37-bf17-aa035bb07d5c?action=share&source=copy-link&creator=25304163
 2. Pilih environment **Adhivasindo Local v2**.
 3. Jalankan:
 
