@@ -1,61 +1,207 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Berikut **README.md** yang bisa langsung kamu taruh di root project.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+# Adhivasindo BookHub (Laravel 11)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+API sederhana untuk Take-Home Test: **Auth (Sanctum)**, **CRUD Buku** + filter, dan **Peminjaman (Loans)** yang mengurangi stok & kirim email via queue (mailer `log`). Disertai **Postman Collection** dan **Testing**.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 1) Prasyarat
 
-## Learning Laravel
+* PHP 8.2+, Composer
+* SQLite (disarankan) atau MySQL
+* Ekstensi `sqlite3` aktif (jika pakai SQLite)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 2) Instalasi & Konfigurasi
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Opsi A — SQLite (paling cepat)
 
-## Laravel Sponsors
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Buat file database SQLite
+# Windows PowerShell:
+New-Item -ItemType File database\database.sqlite -Force | Out-Null
+# Linux/Mac:
+# touch database/database.sqlite
+```
 
-### Premium Partners
+Edit `.env`:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```env
+APP_NAME="Adhivasindo BookHub"
+APP_ENV=local
+APP_KEY=base64:... (sudah diisi)
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
 
-## Contributing
+DB_CONNECTION=sqlite
+# Kosongkan DB_HOST/PORT/USER/PASS/DB_DATABASE
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+MAIL_MAILER=log
+QUEUE_CONNECTION=database   # atau 'sync' untuk dev cepat (tanpa worker)
+```
 
-## Code of Conduct
+### Opsi B — MySQL (opsional)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=bookhub
+DB_USERNAME=root
+DB_PASSWORD=
+MAIL_MAILER=log
+QUEUE_CONNECTION=database
+```
 
-## Security Vulnerabilities
+> Buat database `bookhub` terlebih dahulu.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 3) Migrasi & Seeder
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan migrate --seed
+```
+
+Seeder menambahkan user demo:
+
+* Email: `iqbaldzulkarnaen12@gmail.com`
+* Password: `password`
+
+> Pastikan **User model** memakai `use Laravel\Sanctum\HasApiTokens;` dan tabel `personal_access_tokens` sudah termigrasi.
+
+---
+
+## 4) Menjalankan Aplikasi
+
+```bash
+# Jalankan server
+php artisan serve
+
+# Jika QUEUE_CONNECTION=database, jalankan worker di terminal lain
+php artisan queue:work
+```
+
+---
+
+## 5) Endpoint Utama
+
+| Method | Path                   | Auth   | Keterangan                               |
+| -----: | ---------------------- | ------ | ---------------------------------------- |
+|   POST | `/api/login`           | —      | Login → Bearer token                     |
+|    GET | `/api/books`           | Bearer | List buku + filter `?author=&year=&q=`   |
+|   POST | `/api/books`           | Bearer | Tambah buku                              |
+|    PUT | `/api/books/{id}`      | Bearer | Update buku                              |
+| DELETE | `/api/books/{id}`      | Bearer | Hapus buku                               |
+|   POST | `/api/loans`           | Bearer | Pinjam buku (`book_id`) → stok–1 + email |
+|    GET | `/api/loans/{user_id}` | Bearer | Daftar pinjaman aktif user               |
+
+**Opsional (memudahkan Postman):**
+Tambahkan di `routes/api.php` untuk ambil user saat ini:
+
+```php
+use Illuminate\Http\Request;
+Route::middleware('auth:sanctum')->get('/me', fn(Request $r) => $r->user());
+```
+
+> **Laravel 11:** pastikan `bootstrap/app.php` mendaftarkan route API:
+
+```php
+->withRouting(
+  web: __DIR__.'/../routes/web.php',
+  api: __DIR__.'/../routes/api.php',
+  commands: __DIR__.'/../routes/console.php',
+  health: '/up',
+)
+```
+
+---
+
+## 6) Pengujian via Postman
+
+1. Import file:
+
+   * `AdhivasindoBookHub_v3.postman_collection.json`
+   * `AdhivasindoLocal_v2.postman_environment.json`
+2. Pilih environment **Adhivasindo Local v2**.
+3. Jalankan:
+
+   * **Auth → Login** → token otomatis tersimpan (`{{token}}`).
+   * **Auth → Me** (opsional) → `{{user_id}}` otomatis terisi.
+   * **Books → Create/List/Search** → `{{book_id}}` terisi saat create.
+   * **Loans → Create Loan** → pinjam buku.
+   * **Loans → List Active Loans by User** → lihat pinjaman aktif.
+
+**Cek email log** (karena `MAIL_MAILER=log`):
+
+* Windows PowerShell:
+
+  ```powershell
+  Get-Content .\storage\logs\mail.log -Wait
+  # atau:
+  Get-Content .\storage\logs\laravel.log -Wait
+  ```
+
+---
+
+## 7) Testing Otomatis
+
+### Pest (disarankan untuk gaya `it()`)
+
+```bash
+composer require --dev pestphp/pest pestphp/pest-plugin-laravel --with-all-dependencies
+php artisan pest:install
+```
+
+`tests/Pest.php` minimal:
+
+```php
+<?php
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+uses(TestCase::class, RefreshDatabase::class)->in('Feature','Unit');
+```
+
+`.env.testing`:
+
+```env
+APP_ENV=testing
+DB_CONNECTION=sqlite
+DB_DATABASE=:memory:
+CACHE_DRIVER=array
+SESSION_DRIVER=array
+MAIL_MAILER=log
+QUEUE_CONNECTION=sync
+```
+
+Jalankan:
+
+```bash
+php artisan optimize:clear
+php artisan test -v
+```
+
+> Alternatif: PHPUnit (class-based) dengan `class ... extends Tests\TestCase { use RefreshDatabase; }`.
+
+---
+
+## 8) Troubleshooting
+
+* **`route:list` hanya 4 route** → pastikan `bootstrap/app.php` memetakan `routes/api.php`.
+* **401 Unauthorized** → belum login / header Bearer token tidak dikirim.
+* **422 "Stok habis"** → update stok buku dulu → pinjam ulang.
+* **Email tidak muncul** → set `QUEUE_CONNECTION=sync` **atau** jalankan `php artisan queue:work`.
+
+---
+
+## Lisensi
+
+Untuk keperluan take-home test & edukasi.
